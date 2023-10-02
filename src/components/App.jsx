@@ -1,11 +1,14 @@
-import Header from "./ui/Header"
+import Header from "./ui/Header";
+import { ThemeProvider } from '@mui/material/styles';
+import theme from './ui/Theme';
 
 function App() {
   return (
-    <>
-     <Header />
-    </>
-  )
+    <ThemeProvider theme={theme}>
+      <Header />
+      Hello!
+    </ThemeProvider>
+  );
 }
 
-export default App
+export default App;
