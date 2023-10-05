@@ -6,10 +6,13 @@ import {
   Tabs,
   Toolbar,
   useScrollTrigger,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import React, { useEffect } from "react";
 import logo from "../../assets/logo.svg";
 import { Link } from "react-router-dom";
+import { useTheme } from "@emotion/react";
 
 function ElevationScroll(props) {
   const { children } = props;
@@ -44,9 +47,22 @@ const ButtonClass = styled(Button)(({ theme }) => ({
 
 export default function Header() {
   const [value, setValue] = React.useState(0);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [open, setOpen] = React.useState(false);
+  const theme = useTheme();
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+  };
+
+  const handleClick = (e) => {
+    setAnchorEl(e.currentTarget);
+    setOpen(true);
+  };
+
+  const handleClose = (e) => {
+    setAnchorEl(null);
+    setOpen(false);
   };
 
   useEffect(() => {
@@ -71,7 +87,6 @@ export default function Header() {
         <AppBar position="fixed">
           <Toolbar disableGutters>
             <Button
-              disableRipple
               component={Link}
               to="/"
               sx={{ padding: 0 }}
@@ -87,10 +102,14 @@ export default function Header() {
             >
               <TabClass component={Link} to="/" label="Home" value={0} />
               <TabClass
+                aria-owns={anchorEl ? "simple-menu" : undefined}
+                aria-haspopup={anchorEl ? "true" : undefined}
                 component={Link}
                 to="/services"
                 label="Services"
                 value={1}
+                onMouseOver={(event) => handleClick(event)}
+                onMouseOout={(event) => handleClose(event)}
               />
               <TabClass
                 component={Link}
@@ -107,13 +126,68 @@ export default function Header() {
               <TabClass
                 component={Link}
                 to="/contact"
-                label="Contac Us"
+                label="Contact Us"
                 value={4}
               />
             </TabContainer>
             <ButtonClass variant="contained" color="secondary">
               Free Estimate
             </ButtonClass>
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{ onMouseLeave: handleClose }}
+              elevation={0}
+              sx={{
+                '.MuiPaper-root': {
+                  backgroundColor: theme.palette.common.blue,
+                  color: "white",
+                  borderRadius: 0
+                },
+              }}
+            >
+              <MenuItem
+                component={Link}
+                to="/customsoftware"
+                onClick={() => {
+                  handleClose();
+                  setValue(1);
+                }}
+                sx={{
+                  ...theme.typography.tab,
+                }}
+              >
+                Custom Software Deveopment
+              </MenuItem>
+              <MenuItem
+                component={Link}
+                to="/mobileapps"
+                onClick={() => {
+                  handleClose();
+                  setValue(1);
+                }}
+                sx={{
+                  ...theme.typography.tab,
+                }}
+              >
+                Mobile App Deveopment
+              </MenuItem>
+              <MenuItem
+                component={Link}
+                to="/websites"
+                onClick={() => {
+                  handleClose();
+                  setValue(1);
+                }}
+                sx={{
+                  ...theme.typography.tab,
+                }}
+              >
+                Website Deveopment
+              </MenuItem>
+            </Menu>
           </Toolbar>
         </AppBar>
       </ElevationScroll>

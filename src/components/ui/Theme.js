@@ -19,7 +19,7 @@ export default createTheme({
   typography: {
     tab: {
       color: "white",
-      fontFamily: "Raleway",
+      fontFamily: "Roboto",
       textTransform: "none",
       fontWeight: 700,
       fontSize: "1rem",
