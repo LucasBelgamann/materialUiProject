@@ -13,6 +13,7 @@ import React, { useEffect } from "react";
 import logo from "../../assets/logo.svg";
 import { Link } from "react-router-dom";
 import { useTheme } from "@emotion/react";
+import { useMediaQuery } from "@mui/material";
 
 function ElevationScroll(props) {
   const { children } = props;
@@ -45,11 +46,13 @@ const ButtonClass = styled(Button)(({ theme }) => ({
   color: "white",
 }));
 
-export default function Header() {
+export default function Header(props) {
   const [value, setValue] = React.useState(0);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [open, setOpen] = React.useState(false);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
   const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -63,6 +66,12 @@ export default function Header() {
   const handleClose = (e) => {
     setAnchorEl(null);
     setOpen(false);
+  };
+
+  const handleMenuItemClick = (e, i) => {
+    setAnchorEl(null);
+    setOpen(false);
+    setSelectedIndex(i);
   };
 
   useEffect(() => {
@@ -79,7 +88,163 @@ export default function Header() {
     } else if (window.location.pathname === "/estimate" && value !== 5) {
       setValue(5);
     }
+
+    switch (window.location.pathname) {
+      case "/":
+        if (value !== 1) {
+          setValue(0);
+        }
+        break;
+      case "/services":
+        if (value !== 1) {
+          setValue(1);
+          setSelectedIndex(0);
+        }
+        break;
+      case "/customsoftware":
+        if (value !== 1) {
+          setValue(1);
+          setSelectedIndex(1);
+        }
+        break;
+      case "/mobileapps":
+        if (value !== 1) {
+          setValue(1);
+          setSelectedIndex(2);
+        }
+        break;
+      case "/websites":
+        if (value !== 1) {
+          setValue(1);
+          setSelectedIndex(3);
+        }
+        break;
+      case "/revolution":
+        if (value !== 2) {
+          setValue(2);
+        }
+        break;
+      case "/about":
+        if (value !== 3) {
+          setValue(3);
+        }
+        break;
+      case "/contact":
+        if (value !== 4) {
+          setValue(4);
+        }
+        break;
+      case "/estimate":
+        if (value !== 5) {
+          setValue(5);
+        }
+        break;
+      default:
+        break;
+    }
   }, [value]);
+
+  const menuOptions = [
+    {
+      name: "All Services",
+      link: "/services",
+      activeIndex: 1,
+      selectedIndex: 0,
+    },
+    {
+      name: "Custom Software Development",
+      link: "/customsoftware",
+      activeIndex: 1,
+      selectedIndex: 1,
+    },
+    {
+      name: "iOS/Android App Development",
+      link: "/mobileapps",
+      activeIndex: 1,
+      selectedIndex: 2,
+    },
+    {
+      name: "Website Development",
+      link: "/websites",
+      activeIndex: 1,
+      selectedIndex: 3,
+    },
+  ];
+
+  const TabsComponent = () => {
+    return (
+      <>
+        <TabContainer
+          textColor="secondary"
+          indicatorColor="none"
+          value={value}
+          onChange={handleChange}
+        >
+          <TabClass component={Link} to="/" label="Home" value={0} />
+          <TabClass
+            aria-owns={anchorEl ? "simple-menu" : undefined}
+            aria-haspopup={anchorEl ? "true" : undefined}
+            component={Link}
+            to="/services"
+            label="Services"
+            value={1}
+            onMouseOver={(event) => handleClick(event)}
+            onMouseOout={(event) => handleClose(event)}
+          />
+          <TabClass
+            component={Link}
+            to="/revolution"
+            label="The Revolution"
+            value={2}
+          />
+          <TabClass component={Link} to="/about" label="About Us" value={3} />
+          <TabClass
+            component={Link}
+            to="/contact"
+            label="Contact Us"
+            value={4}
+          />
+        </TabContainer>
+        <ButtonClass variant="contained" color="secondary">
+          Free Estimate
+        </ButtonClass>
+        <Menu
+          id="simple-menu"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          MenuListProps={{ onMouseLeave: handleClose }}
+          elevation={0}
+          sx={{
+            ".MuiPaper-root": {
+              backgroundColor: theme.palette.common.blue,
+              color: "white",
+              borderRadius: 0,
+            },
+          }}
+        >
+          {menuOptions.map((option, index) => (
+            <MenuItem
+              key={option}
+              component={Link}
+              to={option.link}
+              sx={{
+                ...theme.typography.tab,
+              }}
+              selected={index === selectedIndex && value === 1}
+              onClick={(event) => {
+                handleMenuItemClick(event, index);
+                setValue(1);
+                handleClose();
+              }}
+            >
+              {option.name}
+            </MenuItem>
+          ))}
+        </Menu>
+      </>
+    );
+  };
 
   return (
     <>
@@ -96,7 +261,7 @@ export default function Header() {
             </Button>
             <TabContainer
               textColor="secondary"
-              indicatorColor="secondary"
+              indicatorColor="none"
               value={value}
               onChange={handleChange}
             >
@@ -141,52 +306,31 @@ export default function Header() {
               MenuListProps={{ onMouseLeave: handleClose }}
               elevation={0}
               sx={{
-                '.MuiPaper-root': {
+                ".MuiPaper-root": {
                   backgroundColor: theme.palette.common.blue,
                   color: "white",
-                  borderRadius: 0
+                  borderRadius: 0,
                 },
               }}
             >
-              <MenuItem
-                component={Link}
-                to="/customsoftware"
-                onClick={() => {
-                  handleClose();
-                  setValue(1);
-                }}
-                sx={{
-                  ...theme.typography.tab,
-                }}
-              >
-                Custom Software Deveopment
-              </MenuItem>
-              <MenuItem
-                component={Link}
-                to="/mobileapps"
-                onClick={() => {
-                  handleClose();
-                  setValue(1);
-                }}
-                sx={{
-                  ...theme.typography.tab,
-                }}
-              >
-                Mobile App Deveopment
-              </MenuItem>
-              <MenuItem
-                component={Link}
-                to="/websites"
-                onClick={() => {
-                  handleClose();
-                  setValue(1);
-                }}
-                sx={{
-                  ...theme.typography.tab,
-                }}
-              >
-                Website Deveopment
-              </MenuItem>
+              {menuOptions.map((option, index) => (
+                <MenuItem
+                  key={option}
+                  component={Link}
+                  to={option.link}
+                  sx={{
+                    ...theme.typography.tab,
+                  }}
+                  selected={index === selectedIndex && value === 1}
+                  onClick={(event) => {
+                    handleMenuItemClick(event, index);
+                    setValue(1);
+                    handleClose();
+                  }}
+                >
+                  {option.name}
+                </MenuItem>
+              ))}
             </Menu>
           </Toolbar>
         </AppBar>
