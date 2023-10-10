@@ -9,11 +9,20 @@ import {
   Menu,
   MenuItem,
   useMediaQuery,
+  SwipeableDrawer,
+  List,
+  ListItem,
+  Drawer,
+  ListItemText,
+  IconButton,
+  ListItemButton,
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "@emotion/react";
 import logo from "../../assets/logo.svg";
+import MenuIcon from "@mui/icons-material/Menu";
+import HomeIcon from "@mui/icons-material/Home";
 
 function ElevationScroll(props) {
   const { children } = props;
@@ -26,6 +35,17 @@ function ElevationScroll(props) {
     elevation: trigger ? 4 : 0,
   });
 }
+
+const ToolbarMargin = styled(Toolbar)(({ theme }) => ({
+  ...theme.mixins.toolbar,
+  marginBottom: "3em",
+  [theme.breakpoints.down("md")]: {
+    marginBottom: "2em",
+  },
+  [theme.breakpoints.down("xs")]: {
+    marginBottom: "1.25em",
+  },
+}));
 
 const TabContainer = styled(Tabs)({
   marginLeft: "auto",
@@ -56,13 +76,29 @@ const LogoStyles = styled("img")(({ theme }) => ({
   },
 }));
 
-export default function Header() {
-  const [value, setValue] = React.useState(0);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [open, setOpen] = React.useState(false);
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
+const DrawerItem = styled(ListItemText)(({ theme }) => ({
+  ...theme.typography.tab,
+  color: "white",
+  opacity: 0.7,
+}));
+
+const DrawerIcon = styled(MenuIcon)(({ theme }) => ({
+  height: "50px",
+  width: "50px",
+  color: "white",
+}));
+
+export default function Header(props) {
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down("md"));
+  const isBrowser = typeof window !== "undefined";
+  const iOS = isBrowser && /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  const [openDrawer, setOpenDrawer] = React.useState(false);
+  const [value, setValue] = React.useState(0);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [openMenu, setOpenMenu] = React.useState(false);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -70,17 +106,17 @@ export default function Header() {
 
   const handleClick = (e) => {
     setAnchorEl(e.currentTarget);
-    setOpen(true);
+    setOpenMenu(true);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
-    setOpen(false);
+    setOpenMenu(false);
   };
 
   const handleMenuItemClick = (e, i) => {
     setAnchorEl(null);
-    setOpen(false);
+    setOpenMenu(false);
     setSelectedIndex(i);
   };
 
@@ -181,6 +217,21 @@ export default function Header() {
     },
   ];
 
+  const routes = [
+    { name: "Home", link: "/", activeIndex: 0 },
+    {
+      name: "Services",
+      link: "/services",
+      activeIndex: 1,
+      ariaOwns: anchorEl ? "simple-menu" : undefined,
+      ariaPopup: anchorEl ? "true" : undefined,
+      mouseOver: (event) => handleClick(event),
+    },
+    { name: "The Revolution", link: "/revolution", activeIndex: 2 },
+    { name: "About Us", link: "/about", activeIndex: 3 },
+    { name: "Contact Us", link: "/contact", activeIndex: 4 },
+  ];
+
   const tabs = (
     <>
       <TabContainer
@@ -215,7 +266,7 @@ export default function Header() {
       <Menu
         id="simple-menu"
         anchorEl={anchorEl}
-        open={open}
+        open={openMenu}
         onClose={handleClose}
         MenuListProps={{ onMouseLeave: handleClose }}
         elevation={0}
@@ -249,6 +300,76 @@ export default function Header() {
     </>
   );
 
+  const drawer = (
+    <React.Fragment>
+      <SwipeableDrawer
+        disableBackdropTransition={!iOS}
+        disableDiscovery={iOS}
+        open={openDrawer}
+        onClose={() => setOpenDrawer(false)}
+        onOpen={() => setOpenDrawer(true)}
+        sx={{
+          "& .MuiPaper-root": {
+            backgroundColor: theme.palette.common.blue,
+            width: "250px",
+          },
+        }}
+      >
+        <ToolbarMargin />
+        <List disablePadding>
+          {routes.map((route) => (
+            <ListItemButton
+              divider
+              key={`${route}${route.activeIndex}`}
+              component={Link}
+              to={route.link}
+              sx={{
+                opacity: 1,
+              }}
+              onClick={() => {
+                setOpenDrawer(false);
+                props.setValue(route.activeIndex);
+              }}
+              selected={props.value === route.activeIndex}
+            >
+              <ListItemText primary={route.name} />
+            </ListItemButton>
+          ))}
+
+          <ListItemButton
+            onClick={() => {
+              setOpenDrawer(false);
+              props.setValue(5);
+            }}
+            divider
+            button
+            component={Link}
+            to="/estimate"
+            sx={{
+              backgroundColor:
+                props.value === 5 ? theme.palette.common.orange : "transparent",
+            }}
+            selected={props.value === 5}
+          >
+            <DrawerItem disableTypography>Free Estimate</DrawerItem>
+          </ListItemButton>
+        </List>
+      </SwipeableDrawer>
+      <IconButton
+        sx={{
+          marginLeft: "auto",
+          "&:hover": {
+            backgroundColor: "transparent",
+          },
+        }}
+        onClick={() => setOpenDrawer(!openDrawer)}
+        disableRipple
+      >
+        <DrawerIcon />
+      </IconButton>
+    </React.Fragment>
+  );
+
   return (
     <>
       <ElevationScroll>
@@ -262,7 +383,7 @@ export default function Header() {
             >
               <LogoStyles alt="company logo" src={logo} />
             </Button>
-            {matches ? null : tabs}
+            {matches ? drawer : tabs}
           </Toolbar>
         </AppBar>
       </ElevationScroll>
